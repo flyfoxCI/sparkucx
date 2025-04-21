@@ -2,7 +2,7 @@
 * Copyright (C) Mellanox Technologies Ltd. 2019. ALL RIGHTS RESERVED.
 * See file LICENSE for terms.
 */
-package org.apache.spark.shuffle.compat.spark_3_1
+package org.apache.spark.shuffle.compat.spark_3_5
 
 import java.io.{File, RandomAccessFile}
 
@@ -26,13 +26,14 @@ class UcxShuffleBlockResolver(ucxShuffleManager: CommonUcxShuffleManager)
     val blockId = ShuffleIndexBlockId(shuffleId, mapId, NOOP_REDUCE_ID)
     val blockManager = SparkEnv.get.blockManager
     dirs
-      .map(ExecutorDiskUtils.getFile(_, blockManager.subDirsPerLocalDir, blockId.name))
+      .map(d =>
+        new File(ExecutorDiskUtils.getFilePath(d, blockManager.subDirsPerLocalDir, blockId.name)))
       .getOrElse(blockManager.diskBlockManager.getFile(blockId))
   }
 
-  override def writeIndexFileAndCommit(shuffleId: ShuffleId, mapId: Long,
-                                       lengths: Array[Long], dataTmp: File): Unit = {
-    super.writeIndexFileAndCommit(shuffleId, mapId, lengths, dataTmp)
+  override def writeMetadataFileAndCommit(shuffleId: ShuffleId, mapId: Long,
+                                       lengths: Array[Long], checksums: Array[Long],dataTmp: File): Unit = {
+    super.writeMetadataFileAndCommit(shuffleId, mapId, lengths,checksums, dataTmp)
     // In Spark-3.0 MapId is long and unique among all jobs in spark. We need to use partitionId as offset
     // in metadata buffer
     val partitionId = TaskContext.getPartitionId()

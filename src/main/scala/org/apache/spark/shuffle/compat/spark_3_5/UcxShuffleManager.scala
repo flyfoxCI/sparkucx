@@ -7,7 +7,7 @@ package org.apache.spark.shuffle
 import scala.collection.JavaConverters._
 
 import org.apache.spark.shuffle.api.ShuffleExecutorComponents
-import org.apache.spark.shuffle.compat.spark_3_1.{UcxShuffleBlockResolver, UcxShuffleReader}
+import org.apache.spark.shuffle.compat.spark_3_5.{UcxShuffleBlockResolver, UcxShuffleReader}
 import org.apache.spark.shuffle.sort.{SerializedShuffleHandle, SortShuffleWriter, UnsafeShuffleWriter}
 import org.apache.spark.util.ShutdownHookManager
 import org.apache.spark.{ShuffleDependency, SparkConf, SparkEnv, TaskContext}
@@ -46,7 +46,7 @@ class UcxShuffleManager(override val conf: SparkConf, isDriver: Boolean) extends
           shuffleExecutorComponents)
       case other: BaseShuffleHandle[K@unchecked, V@unchecked, _] =>
         new SortShuffleWriter(
-          shuffleBlockResolver, other, mapId, context, shuffleExecutorComponents)
+          other, mapId, context,metrics, shuffleExecutorComponents)
     }
   }
 
